@@ -16,8 +16,6 @@ var PORT_SCAN_FILE = [...]string{"/proc/net/raw", "/proc/net/raw6", "/proc/net/t
 	"/proc/net/udp", "/proc/net/udp6", "/proc/net/udplite", "/proc/net/udplite6"}
 
 //var SPECIAL_AVAILABLE_PORTS = [...]int {80, 443, 53, 8080, 2379, 4001}
-var AVAILABLE_PORT_START int = 20000
-var AVAILABLE_PORT_END int = 20999
 
 type PortSet struct {
 	m map[int]bool
@@ -74,7 +72,7 @@ func (s *PortSet) List() []interface{} {
 	return list
 }
 
-func GetAllAvailablePorts() (availablePorts []int, err error) {
+func GetAllAvailablePorts(startPort int, endPort int) (availablePorts []int, err error) {
 	var portSet *PortSet = NewSet()
 	for _, file := range PORT_SCAN_FILE {
 		portInfoStr, readFileError := ioutil.ReadFile(file)
@@ -100,7 +98,7 @@ func GetAllAvailablePorts() (availablePorts []int, err error) {
 			}
 		}
 	}
-	for aport := AVAILABLE_PORT_START; aport <= AVAILABLE_PORT_END; aport++ {
+	for aport := startPort; aport <= endPort; aport++ {
 		if !portSet.Has(aport) {
 			availablePorts = append(availablePorts, aport)
 		}
@@ -115,7 +113,17 @@ func GetAvailablePorts(portNum int) ([]int, error) {
 	} else if portNum == 0 {
 		return ports, nil
 	}
-	availablePorts, err := GetAllAvailablePorts()
+	autoPortStart := GetEnv("AVAILABLE_PORT_START")
+	autoPortEnd := GetEnv("AVAILABLE_PORT_END")
+	var AVAILABLE_PORT_START int = 20000
+	var AVAILABLE_PORT_END int = 20999
+	if len(autoPortStart) > 0 {
+		AVAILABLE_PORT_START, _ = strconv.Atoi(autoPortStart)
+	}
+	if len(autoPortEnd) > 0 {
+		AVAILABLE_PORT_END, _ = strconv.Atoi(autoPortEnd)
+	}
+	availablePorts, err := GetAllAvailablePorts(AVAILABLE_PORT_START, AVAILABLE_PORT_END)
 	if err != nil {
 		return nil, err
 	}
