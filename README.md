@@ -34,7 +34,7 @@ For Ubuntu Images:
 
 ```
 RUN apt-get update && apt-get install -y wget
-RUN wget http://domeos-binpack.bjcnc.scs.sohucs.com/domeize -o /usr/local/bin/domeize && chmod +x /usr/local/bin/domeize
+RUN wget http://domeos-binpack.bjcnc.scs.sohucs.com/domeize -O /usr/local/bin/domeize && chmod +x /usr/local/bin/domeize
 ```
 
 ## Usage
