@@ -9,6 +9,7 @@ all: dockerize
 dockerize:
 	echo "Building dockerize"
 	go install -ldflags "$(LDFLAGS)"
+	CGO_ENABLED=0 go build -a -installsuffix cgo 
 
 dist-clean:
 	rm -rf dist

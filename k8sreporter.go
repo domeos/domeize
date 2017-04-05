@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
-	"io/ioutil"
 )
 
 //type podSpec struct {
@@ -21,7 +21,7 @@ import (
 
 type response struct {
 	ResultCode int
-	ResultMsg string
+	ResultMsg  string
 }
 
 func getPatchUrl(server string, clusterName string) (string, error) {
@@ -31,8 +31,8 @@ func getPatchUrl(server string, clusterName string) (string, error) {
 		log.Fatalf("failed to get url:namespace:%s, podname:%s, k8sserver:%s", ns, name, server)
 		return "", errors.New("failed to get k8s api server")
 	}
-	server = strings.Replace(server, "http://", "", 1)
-	return fmt.Sprintf("http://%s/api/agent/pod/%s/%s/%s/annotation", server, clusterName, ns, name), nil
+	// server = strings.Replace(server, "http://", "", 1)
+	return fmt.Sprintf("%s/api/agent/pod/%s/%s/%s/annotation", server, clusterName, ns, name), nil
 }
 
 func patchInfo(apiAddr string, body io.Reader) error {
@@ -40,7 +40,7 @@ func patchInfo(apiAddr string, body io.Reader) error {
 	if err != nil {
 		return err
 	}
-//	req.Header.Add("Content-Type", "application/strategic-merge-patch+json")
+	//	req.Header.Add("Content-Type", "application/strategic-merge-patch+json")
 	req.Header.Add("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -49,7 +49,7 @@ func patchInfo(apiAddr string, body io.Reader) error {
 	}
 	if resp.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(resp.Body)
-		bodystr := string(body);
+		bodystr := string(body)
 		errInfo := fmt.Sprintf("report port not ok, code:%d, ret:%s", resp.StatusCode, bodystr)
 		return errors.New(errInfo)
 	}
@@ -71,7 +71,7 @@ func patchInfo(apiAddr string, body io.Reader) error {
 
 func ReportInfos(server string, clusterName string, portEnvs map[string]string) error {
 
-//	st := podSpec{metadatast{portEnvs}}
+	//	st := podSpec{metadatast{portEnvs}}
 	body, err := json.Marshal(portEnvs)
 	if err != nil {
 		return err
