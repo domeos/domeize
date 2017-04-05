@@ -1,27 +1,27 @@
 domeize ![version v0.2.0](https://img.shields.io/badge/version-v0.2.0-brightgreen.svg) ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 =============
-domeize if forked from dockerize and added some more function to meet needs for DomeOS.
+domeize if forked from domeize and added some more function to meet needs for DomeOS.
 
 Utility to simplify running applications in docker containers.
 
-dockerize is a utility to simplify running applications in docker containers.  It allows you
+domeize is a utility to simplify running applications in docker containers.  It allows you
 to generate application configuration files at container startup time from templates and
 container environment variables.  It also allows log files to be tailed to stdout and/or
 stderr.
 
-The typical use case for dockerize is when you have an application that has one or more
+The typical use case for domeize is when you have an application that has one or more
 configuration files and you would like to control some of the values using environment variables.
 
 For example, a Python application using Sqlalchemy might not be able to use environment variables directly.
 It may require that the database URL be read from a python settings file with a variable named
-`SQLALCHEMY_DATABASE_URI`.  dockerize allows you to set an environment variable such as
+`SQLALCHEMY_DATABASE_URI`.  domeize allows you to set an environment variable such as
 `DATABASE_URL` and update the python file when the container starts.
 
 Another use case is when the application logs to specific files on the filesystem and not stdout
 or stderr. This makes it difficult to troubleshoot the container using the `docker logs` command.
 For example, nginx will log to `/var/log/nginx/access.log` and
 `/var/log/nginx/error.log` by default. While you can sometimes work around this, it's tedious to find
-the a solution for every application. dockerize allows you to specify which logs files should
+the a solution for every application. domeize allows you to specify which logs files should
 be tailed and where they should be sent.
 
 See [A Simple Way To Dockerize Applications](http://jasonwilder.com/blog/2014/10/13/a-simple-way-to-dockerize-applications/)
@@ -30,26 +30,23 @@ See [A Simple Way To Dockerize Applications](http://jasonwilder.com/blog/2014/10
 
 Download the latest version in your container:
 
-* [linux/amd64](https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz)
-
 For Ubuntu Images:
 
 ```
 RUN apt-get update && apt-get install -y wget
-RUN wget https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz
-RUN tar -C /usr/local/bin -xzvf dockerize-linux-amd64-v0.2.0.tar.gz
+RUN wget http://domeos-binpack.bjcnc.scs.sohucs.com/domeize -O /usr/local/bin/domeize && chmod +x /usr/local/bin/domeize
 ```
 
 ## Usage
 
-dockerize works by wrapping the call to your application using the `ENTRYPOINT` or `CMD` directives.
+domeize works by wrapping the call to your application using the `ENTRYPOINT` or `CMD` directives.
 
 This would generate `/etc/nginx/nginx.conf` from the template located at `/etc/nginx/nginx.tmpl` and
 send `/var/log/nginx/access.log` to `STDOUT` and `/var/log/nginx/error.log` to `STDERR` after running
 `nginx`, only after waiting for the `web` host to respond on `tcp 8000`:
 
 ```
-CMD dockerize -template /etc/nginx/nginx.tmpl:/etc/nginx/nginx.conf -stdout /var/log/nginx/access.log -stderr /var/log/nginx/error.log -wait tcp://web:8000 nginx
+CMD domeize -template /etc/nginx/nginx.tmpl:/etc/nginx/nginx.conf -stdout /var/log/nginx/access.log -stderr /var/log/nginx/error.log -wait tcp://web:8000 nginx
 ```
 
 modification:
@@ -61,14 +58,14 @@ modification:
 You can specify multiple templates by passing using `-template` multiple times:
 
 ```
-$ dockerize -template template1.tmpl:file1.cfg -template template2.tmpl:file3
+$ domeize -template template1.tmpl:file1.cfg -template template2.tmpl:file3
 
 ```
 
 Templates can be generated to `STDOUT` by not specifying a dest:
 
 ```
-$ dockerize -template template1.tmpl
+$ domeize -template template1.tmpl
 
 ```
 
@@ -76,14 +73,14 @@ $ dockerize -template template1.tmpl
 You can tail multiple files to `STDOUT` and `STDERR` by passing the options multiple times.
 
 ```
-$ dockerize -stdout info.log -stdout perf.log
+$ domeize -stdout info.log -stdout perf.log
 
 ```
 
 If `inotify` does not work in you container, you use `-poll` to poll for file changes instead.
 
 ```
-$ dockerize -stdout info.log -stdout perf.log -poll
+$ domeize -stdout info.log -stdout perf.log -poll
 
 ```
 
@@ -91,7 +88,7 @@ $ dockerize -stdout info.log -stdout perf.log -poll
 If your file uses `{{` and `}}` as part of it's syntax, you can change the template escape characters using the `-delims`.
 
 ```
-$ dockerize -delims "<%:%>"
+$ domeize -delims "<%:%>"
 ```
 
 ## Waiting for other dependencies
@@ -101,7 +98,7 @@ It is common when using tools like [Docker Compose](https://docs.docker.com/comp
 Dockerize gives you the ability to wait for services on a specified protocol (`tcp`, `tcp4`, `tcp6`, `http`, and `https`) before starting your application:
 
 ```
-$ dockerize -wait tcp://db:5432 -wait http://web:80
+$ domeize -wait tcp://db:5432 -wait http://web:80
 ```
 
 See [this issue](https://github.com/docker/compose/issues/374#issuecomment-126312313) for a deeper discussion, and why support isn't and won't be available in the Docker ecosystem itself.
